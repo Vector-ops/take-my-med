@@ -12,7 +12,7 @@ const router = require("express").Router();
 router.route("/login").post(userLogin);
 router.route("/signup").post(userRegister);
 router.route("/logout").post(userLogout);
-router.route("/me").get(validateSession, getMe);
-router.route("/me/:email").get(validateSession, getUserByEmail);
+router.route("/profile").get(validateSession, getMe);
+router.route("/user/:email").get(getUserByEmail);
 
 module.exports = router;
