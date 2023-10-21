@@ -2,6 +2,9 @@ const createHttpError = require("http-errors");
 const Reminder = require("../models/reminder.schema");
 const User = require("../models/user.schema");
 
+//@desc Set reminder
+//@route POST /api/v1/reminder/set
+//@access private
 const setReminder = async (req, res, next) => {
 	try {
 		const { title, description, caretakers, time, days, recur } = req.body;
@@ -23,6 +26,9 @@ const setReminder = async (req, res, next) => {
 	}
 };
 
+//@desc Get all reminders
+//@route GET /api/v1/reminder/getAll
+//@access private
 const getAllReminders = async (req, res, next) => {
 	try {
 		const user = await User.findOne({ _id: req.session.userId })
@@ -37,6 +43,9 @@ const getAllReminders = async (req, res, next) => {
 	}
 };
 
+//@desc Get reminder using id
+//@route GET /api/v1/reminder/:id
+//@access private
 const getReminderById = async (req, res, next) => {
 	try {
 		const user = await User.findOne({ _id: req.session.userId }).populate(
@@ -56,9 +65,14 @@ const getReminderById = async (req, res, next) => {
 			return next(createHttpError.NotFound("Reminder not found."));
 		}
 		res.status(200).json({ reminder });
-	} catch (error) {}
+	} catch (error) {
+		console.error(error);
+	}
 };
 
+//@desc Delete reminder
+//@route DELETE /api/v1/reminder/:id
+//@access private
 const deleteReminder = async (req, res, next) => {
 	try {
 		const user = await User.findByIdAndUpdate({ _id: req.session.userId });
