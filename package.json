@@ -1,0 +1,32 @@
+{
+	"name": "take-my-med",
+	"version": "0.0.1",
+	"description": "Internship project for Amrutam Pharmaceuticals. TakeMyMed is a we app that can be used to set reminders and personalized messages to take medicines. You can even assign a caretaker, caretaker will also recieve the notifications.",
+	"main": "index.js",
+	"scripts": {
+		"start": "node src/index.js",
+		"dev": "nodemon src/index.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Vector-ops"
+	},
+	"keywords": [
+		"notifications",
+		"reminders",
+		"medicines",
+		"internship",
+		"project"
+	],
+	"author": "Sumith B H",
+	"license": "ISC",
+	"dependencies": {
+		"dotenv": "^16.3.1",
+		"express": "^4.18.2",
+		"mongoose": "^7.6.3",
+		"node-schedule": "^2.1.1"
+	},
+	"devDependencies": {
+		"nodemon": "^3.0.1"
+	}
+}
