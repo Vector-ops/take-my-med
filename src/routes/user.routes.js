@@ -9,6 +9,6 @@ const router = require("express").Router();
 
 router.route("/update").put(validateSession, updateUser);
 router.route("/profile").get(validateSession, getMe);
-router.route("/:email").get(getUserByEmail);
+router.route("/:email").get(validateSession, getUserByEmail);
 
 module.exports = router;
