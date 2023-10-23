@@ -7,6 +7,7 @@ const userRouter = require("./routes/user.routes");
 const store = require("./db/mongo_session_init");
 const session = require("express-session");
 const reminderRoutes = require("./routes/reminder.routes");
+const client = require("./db/redis_init");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -34,6 +35,7 @@ app.use(errorHandler);
 const bootstrap = async () => {
 	try {
 		await ConnectDB(process.env.MONGO_URI, process.env.MONGO_DB);
+		await client.connect();
 		app.listen(PORT, () => {
 			console.log(`Server listening at http://localhost:${PORT}`);
 		});

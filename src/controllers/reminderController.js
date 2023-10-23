@@ -1,15 +1,17 @@
 const createHttpError = require("http-errors");
 const Reminder = require("../models/reminder.schema");
 const User = require("../models/user.schema");
+const { scheduleJob, cancelReminder } = require("../utils/scheduleJob");
 
-//@desc Set reminder
-//@route POST /api/v1/reminder/set
-//@access private
+/**
+ * @desc Set reminder
+ * @route POST /api/v1/reminder/set
+ * @access private
+ */
 const setReminder = async (req, res, next) => {
 	try {
 		const { title, description, caretakers, time, days, recur } = req.body;
 		const reminder = await Reminder.create({
-			user_id: req.session.userId,
 			title,
 			description,
 			caretakers,
@@ -20,15 +22,31 @@ const setReminder = async (req, res, next) => {
 		const user = await User.findOne({ _id: req.session.userId });
 		user.reminders.push(reminder._id);
 		await user.save();
+		scheduleJob(
+			reminder.id,
+			title,
+			description,
+			time,
+			days,
+			recur,
+			user.email
+		);
 		res.status(200).json({ reminder, user });
 	} catch (error) {
 		console.error(error);
+		return next(
+			createHttpError.InternalServerError(
+				"Something went wrong please try again."
+			)
+		);
 	}
 };
 
-//@desc Get all reminders
-//@route GET /api/v1/reminder/getAll
-//@access private
+/**
+ * @desc Get all reminders
+ * @route GET /api/v1/reminder/getAll
+ * @access private
+ */
 const getAllReminders = async (req, res, next) => {
 	try {
 		const user = await User.findOne({ _id: req.session.userId })
@@ -40,12 +58,19 @@ const getAllReminders = async (req, res, next) => {
 		return res.status(200).json({ reminders: user.reminders });
 	} catch (error) {
 		console.error(error);
+		return next(
+			createHttpError.InternalServerError(
+				"Something went wrong please try again."
+			)
+		);
 	}
 };
 
-//@desc Get reminder using id
-//@route GET /api/v1/reminder/:id
-//@access private
+/**
+ * @desc Get reminder using id
+ * @route GET /api/v1/reminder/:id
+ * @access private
+ */
 const getReminderById = async (req, res, next) => {
 	try {
 		const user = await User.findOne({ _id: req.session.userId }).populate(
@@ -67,15 +92,22 @@ const getReminderById = async (req, res, next) => {
 		res.status(200).json({ reminder });
 	} catch (error) {
 		console.error(error);
+		return next(
+			createHttpError.InternalServerError(
+				"Something went wrong please try again."
+			)
+		);
 	}
 };
 
-//@desc Delete reminder
-//@route DELETE /api/v1/reminder/:id
-//@access private
+/**
+ * @desc Delete reminder
+ * @route DELETE /api/v1/reminder/:id
+ * @access private
+ */
 const deleteReminder = async (req, res, next) => {
 	try {
-		const user = await User.findByIdAndUpdate({ _id: req.session.userId });
+		const user = await User.findOne({ _id: req.session.userId });
 		if (!user) {
 			await req.session.destroy();
 			return next(createHttpError.Unauthorized("Please login again."));
@@ -83,11 +115,48 @@ const deleteReminder = async (req, res, next) => {
 		if (!user.reminders) {
 			return res.status(200).json({ message: "No reminders." });
 		}
+		cancelReminder(req.params.id);
+		await Reminder.findByIdAndDelete({ _id: req.params.id });
 		user.reminders.pull(req.params.id);
 		await user.save();
 		return res.status(200).json({ reminder: user.reminders });
 	} catch (error) {
 		console.error(error);
+		return next(
+			createHttpError.InternalServerError(
+				"Something went wrong please try again."
+			)
+		);
+	}
+};
+
+/**
+ * @desc Update reminder
+ * @route PUT /api/v1/reminder/:id
+ * @access private
+ */
+
+const updateReminder = async (req, res, next) => {
+	try {
+		const { title, description, caretakers, time, days, recur } = req.body;
+		const reminder = await Reminder.findByIdAndUpdate(
+			{
+				_id: req.params.id,
+			},
+			{ title, description, caretakers, time, days, recur },
+			{ new: true, runValidators: true }
+		);
+		if (!reminder) {
+			return next(createHttpError.NotFound("Reminder not found."));
+		}
+		res.status(200).json(reminder);
+	} catch (error) {
+		console.error(error);
+		return next(
+			createHttpError.InternalServerError(
+				"Something went wrong please try again."
+			)
+		);
 	}
 };
 
@@ -96,4 +165,5 @@ module.exports = {
 	getAllReminders,
 	getReminderById,
 	deleteReminder,
+	updateReminder,
 };
