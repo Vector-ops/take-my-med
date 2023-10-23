@@ -22,6 +22,12 @@ const userSchema = mongoose.Schema(
 				ref: "Reminder",
 			},
 		],
+		caretakers: [
+			{
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "User",
+			},
+		],
 	},
 	{ timestamps: true }
 );
