@@ -31,7 +31,6 @@ const setReminder = async (req, res, next) => {
 		await user.save();
 		const email = await getCaretakers(caretakers);
 		email.push(user.email);
-		console.log(email);
 		scheduleJob(reminder.id, title, description, time, days, recur, email);
 		res.status(200).json({ reminder, user });
 	} catch (error) {
@@ -174,7 +173,6 @@ const updateReminder = async (req, res, next) => {
 			reminder.recur,
 			email
 		);
-		console.log(email);
 		res.status(200).json(reminder);
 	} catch (error) {
 		console.error(error);

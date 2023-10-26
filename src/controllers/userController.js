@@ -17,7 +17,7 @@ const updateUser = async (req, res, next) => {
 				caretakers,
 			},
 			{ new: true }
-		);
+		).populate("caretakers");
 		if (!user) {
 			return next(
 				createHttpError.InternalServerError(
@@ -25,7 +25,13 @@ const updateUser = async (req, res, next) => {
 				)
 			);
 		}
-		res.status(200).json(user);
+		res.status(200).json({
+			id: user._id,
+			name: user.name,
+			email: user.email,
+			reminders: user.reminders,
+			caretakers: user.caretakers,
+		});
 	} catch (error) {
 		return next(
 			createHttpError.InternalServerError(
@@ -42,7 +48,9 @@ const updateUser = async (req, res, next) => {
  */
 const getMe = async (req, res, next) => {
 	try {
-		const user = await User.findOne({ _id: req.session.userId });
+		const user = await User.findOne({ _id: req.session.userId }).populate(
+			"caretakers"
+		);
 		if (!user) {
 			req.session.destroy();
 			return next(
@@ -54,6 +62,7 @@ const getMe = async (req, res, next) => {
 			name: user.name,
 			email: user.email,
 			reminders: user.reminders,
+			caretakers: user.caretakers,
 		});
 	} catch (error) {
 		console.error(error);
